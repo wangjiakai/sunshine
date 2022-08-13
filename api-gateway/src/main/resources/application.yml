@@ -1,0 +1,62 @@
+server:
+  port: 8080 # gateway server 运行的端口
+
+spring:
+  application:
+    name: api-gateway # 此服务的名称（注册到注册中心用）
+  cloud:
+    nacos:
+      server-addr: http://192.168.83.128:8848 # 注册到的nacos地址
+    sentinel:  # 配置 sentinel
+      transport:
+        dashboard: 192.168.83.129:8080
+    gateway:
+      globalcors: # 统一配置跨域请求
+        cors-configurations:
+          '[/**]':
+            allowed-origins: "*"
+            allowed-headers: "*"
+            allow-credentials: true
+            allowed-methods:
+              - GET
+              - POST
+              - DELETE
+              - PUT
+              - OPTION
+      routes: # 网关路由配置
+        - id: user-service # 路由id，自定义，只要唯一即可
+          uri: lb://user-service # 路由的目标地址 lb就是负载均衡，后面跟服务名称
+          predicates: # 路由断言，也就是判断请求是否符合路由规则的条件
+            - Path=/user/** # 这个是按照路径匹配，只要以/user/开头就符合要求
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/order/**
+            #- Query=smile 只要请求中包含 smile 属性的参数即可匹配路由
+            #- Header=X-Request-Id, \d+  Header 属性匹配
+            #- Host=**.baidu.com  通过 Host 匹配
+            #- Method=GET 通过请求方式匹配
+            #- RemoteAddr=192.168.1.1/24  通过请求 ip 地址进行匹配
+          filters:  ### 请求路径前加上/app
+            - PrefixPath=/app
+        - id: limit-service #  分布式限流 令牌桶
+          uri: lb://test-service # 路由的目标地址 lb就是负载均衡，后面跟服务名称
+          predicates: # 路由断言，也就是判断请求是否符合路由规则的条件
+            - Path=/test/** # 这个是按照路径匹配，只要以/user/开头就符合要求
+          filters:
+            - name: RequestRateLimiter
+              args:
+                key-resolver: '#{@ipKeyResolver}'
+                redis-rate-limiter.replenishRate: 1
+                redis-rate-limiter.burstCapacity: 3
+  redis:
+    host: 192.168.83.128
+    port: 6379
+    database: 1
+    password: index@123456
+#暴露actuator端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
