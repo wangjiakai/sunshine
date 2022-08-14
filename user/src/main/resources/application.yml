@@ -1,0 +1,24 @@
+server:
+  port: 8081 # gateway server 运行的端口
+
+spring:
+  application:
+    name: user-server # 此服务的名称（注册到注册中心用）
+  cloud:
+    nacos:
+      server-addr: http://192.168.83.128:8848 # 注册到的nacos地址
+    sentinel:  # 配置 sentinel
+      transport:
+        dashboard: 192.168.83.129:8080
+
+  redis:
+    host: 192.168.83.128
+    port: 6379
+    database: 1
+    password: index@123456
+#暴露actuator端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
