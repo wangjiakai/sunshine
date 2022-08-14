@@ -74,28 +74,20 @@
                 </configuration>
             </plugin>
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <appendAssemblyId>false</appendAssemblyId>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <manifest>
-                            <!-- 此处指定main方法入口的class -->
-                            <mainClass>com.sunshine.user.UserApplication</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
                         <goals>
-                            <goal>assembly</goal>
+                            <goal>repackage</goal>
                         </goals>
                     </execution>
                 </executions>
+
+                <configuration>
+                    <includeSystemScope>true</includeSystemScope>
+                    <mainClass>com.sunshine.user.UserApplication</mainClass>
+                </configuration>
             </plugin>
         </plugins>
     </build>
